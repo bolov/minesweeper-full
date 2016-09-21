@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="game.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="gsl_bolov_extensions.h" />
+    <ClInclude Include="grid.h" />
+    <ClInclude Include="gsl\multi_span">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="gsl\span">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="gsl\string_span">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="gsl">
+      <UniqueIdentifier>{8a8c0cc6-a3f8-4302-8a12-d17cf73a12ef}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gsl\gsl">
+      <Filter>gsl</Filter>
+    </None>
+    <None Include="gsl\gsl_assert">
+      <Filter>gsl</Filter>
+    </None>
+    <None Include="gsl\gsl_byte">
+      <Filter>gsl</Filter>
+    </None>
+    <None Include="gsl\gsl_util">
+      <Filter>gsl</Filter>
+    </None>
+  </ItemGroup>
+</Project>
