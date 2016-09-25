@@ -30,7 +30,7 @@ int main() try {
 
         cout << "> ";
         cin >> i >> j;
-        grid.hidden_[i][j] = false;
+        grid.display_[i][j] = Grid::Display::e_shown;
     }
 
     cout << "Ok go" << endl;

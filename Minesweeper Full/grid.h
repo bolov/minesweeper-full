@@ -14,12 +14,19 @@ namespace minesweeper {
 
 class Grid {
 public:
+    enum class Display {
+        e_shown,
+        e_hidden,
+        e_flag,
+        e_question,
+    };
+
     static const int sk_bomb_cell = -1;
 
 private:
 public: // TODO delete
     containers::Matrix<int> bombs_;
-    containers::Matrix<int> hidden_;
+    containers::Matrix<Display> display_;
     gslx::size_t num_bombs_;
 
     auto get_num_neighbour_bombs(gslx::size_t i, gslx::size_t j) -> int
@@ -42,12 +49,12 @@ public: // TODO delete
 public:
     Grid() = delete;
     Grid(gslx::size_t column_size, gslx::size_t line_size, gslx::size_t num_bombs)
-        : bombs_(column_size, line_size), hidden_(column_size, line_size, true),
+        : bombs_(column_size, line_size), display_(column_size, line_size, Display::e_hidden),
           num_bombs_{num_bombs}
     {
         Expects(column_size > 0);
         Expects(line_size > 0);
-        //Expects(num_bombs > 0 && num_bombs <= column_size * line_size);
+        Expects(num_bombs > 0 && num_bombs <= column_size * line_size);
 
         std::mt19937 random_engine{std::random_device{}()};
 
@@ -66,17 +73,17 @@ public:
                     bombs_[i][j] = get_num_neighbour_bombs(i, j);
             }
         }
-        
 
-        Ensures(!bombs_.empty() && !hidden_.empty());
-        Ensures(bombs_.column_size() == hidden_.column_size());
-        Ensures(bombs_.line_size() == hidden_.line_size());
+        Ensures(!bombs_.empty() && !display_.empty());
+        Ensures(bombs_.column_size() == display_.column_size());
+        Ensures(bombs_.line_size() == display_.line_size());
     }
 };
 
 auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
 {
     using utils::Size_range;
+
     os << "   ";
     for (auto i : Size_range{0, grid.bombs_.line_size()})
         os << (i % 10) << " ";
@@ -89,14 +96,26 @@ auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
     for (auto i : Size_range{0, grid.bombs_.column_size()}) {
         os << (i % 10) << "| ";
         for (auto j : Size_range{0, grid.bombs_.line_size()}) {
-            if (grid.hidden_[i][j]) {
+            switch (grid.display_[i][j])
+            {
+            case Grid::Display::e_shown:
+                if (grid.bombs_[i][j] == Grid::sk_bomb_cell)
+                    os << '*' << " ";
+                else if (grid.bombs_[i][j] == 0)
+                    os << ' ' << " ";
+                else
+                    os << grid.bombs_[i][j] << " ";
+                break;
+            case Grid::Display::e_hidden:
+                os << '\"' << " ";
+                break;
+            case Grid::Display::e_flag:
+                os << 'F' << " ";
+                break;
+            case Grid::Display::e_question:
                 os << '?' << " ";
-                continue;
+                break;
             }
-            if (grid.bombs_[i][j] == Grid::sk_bomb_cell)
-                os << '*' << " ";
-            else
-                os << grid.bombs_[i][j] << " ";
         }
         os << std::endl << std::endl;
     }
