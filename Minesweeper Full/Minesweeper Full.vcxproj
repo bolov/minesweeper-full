@@ -89,6 +89,7 @@
     <ClInclude Include="grid.h" />
     <ClInclude Include="gsl_bolov_extensions.h" />
     <ClInclude Include="matrix.h" />
+    <ClInclude Include="string_algo.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>

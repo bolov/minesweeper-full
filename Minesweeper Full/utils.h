@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "gsl\gsl"
 
 namespace bolov {
@@ -56,5 +57,11 @@ auto make_size_range(const Container& cont) -> Size_range
 {
     return {0, cont.size()};
 }
+
+template <class It, class T>
+auto contains(It begin, It end, T value) -> bool
+{
+    return std::find(begin, end, value) != end;
 }
-}
+} // ns utils
+} // ns bolov

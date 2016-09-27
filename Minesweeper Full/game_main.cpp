@@ -6,6 +6,7 @@
 
 #include "matrix.h"
 #include "utils.h"
+#include "string_algo.h"
 
 #include "game.h"
 
@@ -15,15 +16,14 @@ using std::cerr;
 using std::endl;
 
 int main() try {
-
-    cout << "It is alive" << endl << endl;
+    cout << "Hello and wake up!" << endl << endl;
 
     using minesweeper::Game;
 
     Game game{8, 20, 25};
     game.main_loop();
 
-    cout << "Ok go" << endl;
+    cout << "Bye Bye now" << endl;
 }
 catch (gsl::fail_fast e)
 {
