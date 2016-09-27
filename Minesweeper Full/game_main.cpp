@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <stdexcept>
 
 #include "gsl\gsl"
 #include "gsl_bolov_extensions.h"
@@ -25,7 +26,11 @@ int main() try {
 
     cout << "Bye Bye now" << endl;
 }
-catch (gsl::fail_fast e)
+catch (const gsl::fail_fast& e)
 {
     cerr << "gsl contract violation: " << e.what() << endl;
+}
+catch (const std::exception& e)
+{
+    cerr << "std::exception : " << e.what() << endl;
 }

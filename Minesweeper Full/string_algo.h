@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstdlib>
+
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
+#include <stdexcept>
 
 #include "gsl\gsl"
 #include "gsl_bolov_extensions.h"
@@ -37,6 +41,31 @@ inline auto split(gsl::cstring_span<> str, gsl::cstring_span<> delims)
     return split_impl(str, [str, delims](char c) {
         return utils::contains(std::begin(delims), std::end(delims), c);
     });
+}
+
+inline auto str_to_int(gsl::cstring_span<> str) -> int
+{
+    using namespace std::string_literals;
+
+    char* last;
+    errno = 0;
+
+    auto value = std::strtoll(str.data(), &last, 10);
+
+    if (last < str.data() + str.size())
+        throw std::out_of_range{"string '"s + gsl::to_string(str) +
+                                "' does not represent an integral value "s};
+
+    try {
+        return gsl::narrow<int>(value);
+    }
+    catch (gsl::narrowing_error&) {
+        throw std::out_of_range{"value in string '"s + gsl::to_string(str) +
+                                "' is out of range for `int`"};
+    }
+    catch (...) {
+        throw;
+    }
 }
 
 } // ns str
