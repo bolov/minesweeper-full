@@ -7,7 +7,7 @@
 #include "matrix.h"
 #include "utils.h"
 
-#include "grid.h"
+#include "game.h"
 
 using std::cin;
 using std::cout;
@@ -18,19 +18,10 @@ int main() try {
 
     cout << "It is alive" << endl << endl;
 
-    using minesweeper::Grid;
+    using minesweeper::Game;
 
-    Grid grid{8, 20, 25};
-    bolov::gslx::size_t i, j;
-
-
-    while (true) {
-        cout << grid << endl << endl;
-
-        cout << "> ";
-        cin >> i >> j;
-        grid.display_[i][j] = Grid::Display::e_shown;
-    }
+    Game game{8, 20, 25};
+    game.main_loop();
 
     cout << "Ok go" << endl;
 }
