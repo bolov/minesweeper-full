@@ -17,24 +17,22 @@
       <Filter>gsl</Filter>
     </ClInclude>
     <ClInclude Include="utils.h" />
+    <ClInclude Include="gsl\gsl">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="gsl\gsl_assert">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="gsl\gsl_byte">
+      <Filter>gsl</Filter>
+    </ClInclude>
+    <ClInclude Include="gsl\gsl_util">
+      <Filter>gsl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="gsl">
       <UniqueIdentifier>{8a8c0cc6-a3f8-4302-8a12-d17cf73a12ef}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="gsl\gsl">
-      <Filter>gsl</Filter>
-    </None>
-    <None Include="gsl\gsl_assert">
-      <Filter>gsl</Filter>
-    </None>
-    <None Include="gsl\gsl_byte">
-      <Filter>gsl</Filter>
-    </None>
-    <None Include="gsl\gsl_util">
-      <Filter>gsl</Filter>
-    </None>
   </ItemGroup>
 </Project>

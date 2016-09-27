@@ -18,11 +18,10 @@ int main() try {
 
     cout << "It is alive" << endl << endl;
 
-    using bolov::minesweeper::Grid;
+    using minesweeper::Grid;
 
     Grid grid{8, 20, 25};
     bolov::gslx::size_t i, j;
-
 
 
     while (true) {

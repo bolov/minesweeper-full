@@ -9,11 +9,11 @@
 #include "utils.h"
 #include "matrix.h"
 
-namespace bolov {
 namespace minesweeper {
 
 class Grid {
 public:
+    using size_t = bolov::gslx::size_t;
     enum class Display {
         e_shown,
         e_hidden,
@@ -25,18 +25,17 @@ public:
 
 private:
 public: // TODO delete
-    containers::Matrix<int> bombs_;
-    containers::Matrix<Display> display_;
-    gslx::size_t num_bombs_;
+    bolov::containers::Matrix<int> bombs_;
+    bolov::containers::Matrix<Display> display_;
+    bolov::gslx::size_t num_bombs_;
 
-    auto get_num_neighbour_bombs(gslx::size_t i, gslx::size_t j) -> int
+    auto get_num_neighbour_bombs(size_t i, size_t j) -> int
     {
-        using utils::Size_range;
-        using utils::make_size_range;
+        using bolov::utils::Size_range;
 
         int sum = 0;
         for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, bombs_.column_size()})) {
-            for (auto nj : utils::Size_range{j - 1, j + 2}.clamp_to({0, bombs_.line_size()})) {
+            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, bombs_.line_size()})) {
                 if (ni == i && nj == j)
                     continue;
                 if (bombs_[ni][nj] == sk_bomb_cell)
@@ -48,7 +47,7 @@ public: // TODO delete
 
 public:
     Grid() = delete;
-    Grid(gslx::size_t column_size, gslx::size_t line_size, gslx::size_t num_bombs)
+    Grid(size_t column_size, size_t line_size, size_t num_bombs)
         : bombs_(column_size, line_size), display_(column_size, line_size, Display::e_hidden),
           num_bombs_{num_bombs}
     {
@@ -64,8 +63,8 @@ public:
 
         bombs_[0][0] = sk_bomb_cell;
 
-        
-        using utils::Size_range;
+        using bolov::utils::Size_range;
+
         // compute neighbours
         for (auto i : Size_range{0, bombs_.column_size()}) {
             for (auto j : Size_range{0, bombs_.line_size()}) {
@@ -80,9 +79,9 @@ public:
     }
 };
 
-auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
+inline auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
 {
-    using utils::Size_range;
+    using bolov::utils::Size_range;
 
     os << "   ";
     for (auto i : Size_range{0, grid.bombs_.line_size()})
@@ -120,6 +119,5 @@ auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
         os << std::endl << std::endl;
     }
     return os;
-}
 }
 }
