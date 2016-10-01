@@ -18,10 +18,8 @@
 namespace bolov {
 namespace str {
 
-namespace detail {
-template <class F>
-inline auto split_impl(gsl::cstring_span<> str, F is_delim)
--> std::vector<gsl::cstring_span<>>
+template <class F, class Enable = decltype(std::declval<bool&>() = std::declval<F>()('a'))>
+inline auto split(gsl::cstring_span<> str, F is_delim) -> std::vector<gsl::cstring_span<>>
 {
     std::vector<gsl::cstring_span<>> tokens;
     tokens.reserve(str.size() / 5); // average word length
@@ -37,12 +35,11 @@ inline auto split_impl(gsl::cstring_span<> str, F is_delim)
     }
     return tokens;
 }
-} // ns detail
 
 inline auto split(gsl::cstring_span<> str, gsl::cstring_span<> delims)
     -> std::vector<gsl::cstring_span<>>
 {
-    return detail::split_impl(str, [str, delims](char c) {
+    return split(str, [str, delims](char c) {
         return utils::contains(std::begin(delims), std::end(delims), c);
     });
 }
