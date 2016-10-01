@@ -18,7 +18,7 @@ public:
 private:
     static const std::unordered_map<Type, std::string> sk_spelling_;
 
-    static auto get_type(const std::string& spelling) -> Type;
+    static auto get_type(gsl::cstring_span<>) -> Type;
 
 private:
     Type type_;
@@ -26,7 +26,7 @@ private:
 public:
     Cmd() = delete;
     Cmd(Type type) : type_{type} {}
-    Cmd(const std::string& spelling) : Cmd{get_type(spelling)} {}
+    Cmd(gsl::cstring_span<> spelling) : Cmd{get_type(spelling)} {}
 
     auto spelling() const -> const std::string& { return sk_spelling_.at(type_); }
     auto type() const -> Type { return type_; }

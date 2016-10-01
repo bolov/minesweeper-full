@@ -25,12 +25,12 @@ const std::unordered_map<Cmd::Type, std::string> Cmd::sk_spelling_ = {
     {Cmd::e_question, "question"},
 };
 
-auto Cmd::get_type(const std::string& spelling) -> Type
+auto Cmd::get_type(gsl::cstring_span<> spelling) -> Type
 {
     using namespace std::string_literals;
 
     if (spelling.empty())
-        throw std::invalid_argument{"cannot convert '"s + spelling + "'Cmd::Type"s};
+        throw std::invalid_argument{"cannot convert '"s + gsl::to_string(spelling) + "'Cmd::Type"s};
 
     auto found_it = std::find_if(std::begin(sk_spelling_), std::end(sk_spelling_),
                                  [spelling = bolov::str::to_lower(spelling)](const auto& p) {
@@ -40,7 +40,7 @@ auto Cmd::get_type(const std::string& spelling) -> Type
                                  });
 
     if (found_it == std::end(sk_spelling_))
-        throw std::invalid_argument{"cannot convert '"s + spelling + "'Cmd::Type"s};
+        throw std::invalid_argument{"cannot convert '"s + gsl::to_string(spelling) + "'Cmd::Type"s};
 
     return found_it->first;
 }
