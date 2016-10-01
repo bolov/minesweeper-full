@@ -28,7 +28,11 @@ public:
     Cmd(Type type) : type_{type} {}
     Cmd(const std::string& spelling) : Cmd{get_type(spelling)} {}
 
-    explicit operator std::string() const { return sk_spelling_.at(type_); }
+    auto spelling() const -> const std::string& { return sk_spelling_.at(type_); }
+    auto type() const -> Type { return type_; }
+
+    explicit operator std::string() const { return spelling(); }
+    operator Type() const { return type(); }
 };
 
 class Game {
