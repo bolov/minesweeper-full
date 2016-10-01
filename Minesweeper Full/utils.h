@@ -63,5 +63,12 @@ auto contains(It begin, It end, T value) -> bool
 {
     return std::find(begin, end, value) != end;
 }
+
+template <class T>
+auto contains(std::initializer_list<T> il, T value) -> bool
+{
+    return contains(std::begin(il), std::end(il), value);
+}
+
 } // ns utils
 } // ns bolov
