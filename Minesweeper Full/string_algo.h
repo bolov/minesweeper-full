@@ -1,10 +1,12 @@
 #pragma once
 
 #include <cstdlib>
+#include <cctype> // to_lower
 
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 
@@ -16,6 +18,7 @@
 namespace bolov {
 namespace str {
 
+namespace detail {
 template <class F>
 inline auto split_impl(gsl::cstring_span<> str, F is_delim)
 -> std::vector<gsl::cstring_span<>>
@@ -30,15 +33,16 @@ inline auto split_impl(gsl::cstring_span<> str, F is_delim)
     {
         token_end = std::find_if(token_begin, str.end(), is_delim);
         tokens.emplace_back(str.subspan(std::distance(str.begin(), token_begin),
-                                        std::distance(token_begin, token_end)));
+            std::distance(token_begin, token_end)));
     }
     return tokens;
 }
+} // ns detail
 
 inline auto split(gsl::cstring_span<> str, gsl::cstring_span<> delims)
     -> std::vector<gsl::cstring_span<>>
 {
-    return split_impl(str, [str, delims](char c) {
+    return detail::split_impl(str, [str, delims](char c) {
         return utils::contains(std::begin(delims), std::end(delims), c);
     });
 }
@@ -66,6 +70,15 @@ inline auto str_to_int(gsl::cstring_span<> str) -> int
     catch (...) {
         throw;
     }
+}
+
+inline auto to_lower(gsl::cstring_span<> str) -> std::string
+{
+    std::string lower;
+    lower.reserve(str.size());
+
+    std::transform(std::begin(str), std::end(str), std::back_inserter(lower), ::tolower);
+    return lower;
 }
 
 } // ns str
