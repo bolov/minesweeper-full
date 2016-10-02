@@ -48,8 +48,8 @@ help
 Commands are case insensitive. As a shortcut, use only the first letter (except for quit). E.g.:
 
 s 2 4
-q 1 5
-r
+f 1 5
+n
 h
 )";
 
