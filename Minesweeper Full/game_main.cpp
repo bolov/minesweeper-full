@@ -45,8 +45,27 @@ int main() try {
 
     ms::Game game{params};
 
-    game.main_loop();
+    while (true) {
+        auto cmd = game.main_loop();
 
+        if (cmd == ms::Cmd::e_quit) {
+            break;
+        }
+
+        if (cmd == ms::Cmd::e_reset) {
+            game = ms::Game{params};
+            continue;
+        }
+
+        if (cmd == ms::Cmd::e_new) {
+            params = ms::Game::get_params();
+            game = ms::Game{params};
+            continue;
+        }
+
+    }
+
+    cout << "Ty for playing. Bye bye" << endl;
 }
 catch (const gsl::fail_fast& e)
 {

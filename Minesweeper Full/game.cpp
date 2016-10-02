@@ -25,7 +25,9 @@ const std::unordered_map<Cmd::Type, std::string> Cmd::sk_spelling_ = {
     {Cmd::e_flag, "flag"},
     {Cmd::e_question, "question"},
     {Cmd::e_clear, "clear"},
+    {Cmd::e_show, "print"},
     {Cmd::e_reset, "reset"},
+    {Cmd::e_new, "new"},
     {Cmd::e_quit, "quit"},
     {Cmd::e_help, "help"},
 };
@@ -37,15 +39,18 @@ show x y
 flag x y
 question x y
 clear x y
+print
 reset
+new
 quit
 help
 
 Commands are case insensitive. As a shortcut, use only the first letter (except for quit). E.g.:
-    s 2 4
-    q 1 5
-    r
-    h
+
+s 2 4
+q 1 5
+r
+h
 )";
 
 auto Full_cmd::parse_line(gsl::cstring_span<> line) -> std::tuple<Cmd, size_t, size_t>
@@ -164,23 +169,28 @@ auto Game::get_params()->Game_params {
     }
 }
 
-auto Game::main_loop() -> void
+auto Game::main_loop() -> Cmd
 {
     std::string line;
 
     cout << "New game. For help enter help... Duh" << endl;
 
-    while (true) {
-        cout << grid_ << endl;
+    bool print = true;
 
-        check_state();
-        if (grid().state() == Grid::State::e_win) {
-            cout << "Congrats. You WON!" << endl << endl;
-            break;
-        }
-        if (grid().state() == Grid::State::e_lose) {
-            cout << "Kaboom !!" << endl << endl;
-            break;
+    while (true) {
+
+        if (print) {
+            cout << grid_ << endl;
+
+            check_state();
+            if (grid().state() == Grid::State::e_win) {
+                cout << "Congrats. You WON!" << endl << endl;
+                break;
+            }
+            if (grid().state() == Grid::State::e_lose) {
+                cout << "Kaboom !!" << endl << endl;
+                break;
+            }
         }
 
         bolov::utils::get_line(line, "> ");
@@ -191,25 +201,44 @@ auto Game::main_loop() -> void
 
             if (!full_cmd.is_simple()) {
                 if (!grid().are_idx_valid(full_cmd.i(), full_cmd.j()))
-                    throw std::invalid_argument{"Coordonates out of range"};
-
+                    throw std::invalid_argument{"Coordinates out of range"};
                 try {
                     execute_cmd(full_cmd);
-
+                    print = true;
                 }
                 catch (std::exception& e) {
                     cerr << "error executing command:" << endl;
                     cerr << e.what() << endl << endl;
+                    print = false;
                 }
+            }
+            // cmd is simple
+            else {
+                if (full_cmd.cmd() == Cmd::e_help) {
+                    cout << Full_cmd::usage() << endl;
+                    print = false;
+                    continue;
+                }
+
+                if (full_cmd.cmd() == Cmd::e_print) {
+                    print = true;
+                    continue;
+                }
+
+                return full_cmd.cmd();
             }
         }
         catch (const std::exception& e) {
             cerr << "Invalid command '"s << line << "': " << endl;
             cerr << e.what() << endl;
             cerr << "type help or h for usage" << endl << endl;
+
+            print = false;
         }
     }
 
+
     cout << "Game over. Thank you for playing" << endl;
+    return Cmd::e_reset;
 }
 }

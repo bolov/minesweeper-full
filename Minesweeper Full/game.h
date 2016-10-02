@@ -14,7 +14,7 @@ using size_t = bolov::gslx::size_t;
 
 class Cmd {
 public:
-    enum Type { e_show, e_flag, e_question, e_clear, e_reset, e_quit, e_help };
+    enum Type { e_show, e_flag, e_question, e_clear, e_print, e_reset, e_new, e_quit, e_help };
 
 private:
     static const std::unordered_map<Type, std::string> sk_spelling_;
@@ -28,7 +28,7 @@ public:
     Cmd(gsl::cstring_span<> spelling) : Cmd{bolov::utils::string_to_enum(spelling, sk_spelling_)} {}
 
     auto is_simple() const -> bool {
-        return bolov::utils::contains({e_reset, e_quit, e_help}, type_);
+        return bolov::utils::contains({e_print, e_reset, e_new, e_quit, e_help}, type_);
     }
 
     auto spelling() const -> const std::string& { return sk_spelling_.at(type_); }
@@ -96,7 +96,7 @@ public:
     }
     Game(Game_params params) : Game{params.column_size, params.line_size, params.num_bombs} {}
 
-    auto main_loop() -> void;
+    auto main_loop() -> Cmd;
 
     const auto& grid() const { return grid_; }
 
