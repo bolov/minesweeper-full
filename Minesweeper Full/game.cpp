@@ -30,25 +30,6 @@ const std::unordered_map<Cmd::Type, std::string> Cmd::sk_spelling_ = {
     {Cmd::e_help, "help"},
 };
 
-auto Cmd::get_type(gsl::cstring_span<> spelling) -> Type
-{
-    if (spelling.empty())
-        throw std::invalid_argument{"cannot convert '"s + gsl::to_string(spelling) + " to 'Cmd::Type"s};
-
-    auto found_it = std::find_if(std::begin(sk_spelling_), std::end(sk_spelling_),
-                                 [spelling = bolov::str::to_lower(spelling)](const auto& p) {
-                                     return spelling == p.second ||
-                                            (spelling.size() == 1 && spelling[0] == p.second[0]);
-                                     return true;
-                                 });
-
-    if (found_it == std::end(sk_spelling_))
-        throw std::invalid_argument{"cannot convert '"s + gsl::to_string(spelling) +
-                                    "' to Cmd::Type"s};
-
-    return found_it->first;
-}
-
 const std::string Full_cmd::usage_ =
 R"(Command usage:
 
@@ -93,17 +74,114 @@ auto Full_cmd::parse_line(gsl::cstring_span<> line) -> std::tuple<Cmd, size_t, s
     }
 }
 
+const std::string Game::welcome_ = "Minesweeper. Enjoy!";
+
+const std::unordered_map<Game::Difficulty, std::string> Game::sk_difficulty_spelling_ = {
+    {Difficulty::e_easy, "easy"},
+    {Difficulty::e_medium, "medium"},
+    {Difficulty::e_difficult, "hard"},
+    {Difficulty::e_custom, "custom"},
+};
+
+const std::unordered_map<Game::Difficulty, Game_params> Game::sk_difficulty_params_ = {
+    {Difficulty::e_easy, {6, 4, 5}},
+    {Difficulty::e_medium, {7, 10, 10}},
+    {Difficulty::e_difficult, {8, 20, 25}},
+    {Difficulty::e_difficult, {-1, -1, -1}},
+};
+
+auto Game::get_custom_params() -> Game_params
+{
+    std::string line;
+
+    while (true) {
+        cout << "Enter column-size line-size number-of-bombs" << endl;
+        bolov::utils::get_line(line, "> ");
+
+        auto tokens = bolov::str::split(line, ::isspace);
+
+        if (tokens.size() != 3) {
+            cerr << "3 arguments required" << endl << endl;
+            continue;
+        }
+
+        try {
+            Game_params params{bolov::str::str_to_int(tokens[0]), bolov::str::str_to_int(tokens[1]),
+                               bolov::str::str_to_int(tokens[2])};
+
+            if (params.column_size < 4 || params.line_size < 4) {
+                cerr << "grid size must be at least 4 4" << endl << endl;
+                continue;
+            }
+
+            if (params.num_bombs < 1) {
+                cerr << "there must be at least 1 bomb" << endl << endl;
+                continue;
+            }
+
+            if (params.num_bombs >= params.column_size * params.line_size) {
+                cerr << "Too many bombs" << endl << endl;
+                continue;
+            }
+
+            cout << endl;
+            return params;
+        }
+        catch (std::exception& e) {
+            cerr << "Please enter 3 numbers: " << endl;
+            cerr << e.what() << endl << endl;
+        }
+    }
+}
+
+auto Game::get_params()->Game_params {
+    std::string line;
+
+    while (true) {
+        cout << "Select difficulty: ";
+
+        for (const auto& p : sk_difficulty_spelling_)
+            cout << p.second << " ";
+        cout << endl;
+
+        bolov::utils::get_line(line, "> ");
+
+        try {
+            auto difficulty = bolov::utils::string_to_enum(line, sk_difficulty_spelling_, false);
+
+            if (difficulty == Difficulty::e_custom) {
+                cout << endl;
+                return get_custom_params();
+            }
+
+            cout << endl;
+            return sk_difficulty_params_.at(difficulty);
+            
+        }
+        catch (std::exception&) {
+            cout << "Invalid command: '" << line << "'" << endl << endl;
+        }
+    }
+}
 
 auto Game::main_loop() -> void
 {
-    bolov::gslx::size_t i, j;
+    std::string line;
 
-    while (true) {
-        cout << grid_ << endl << endl;
+    cout << "New game. For help enter help... Duh" << endl;
 
-        cout << "> ";
-        cin >> i >> j;
-        grid_.display_[i][j] = Grid::Display::e_shown;
+    while (bolov::utils::get_line(line, "> ")) {
+        try {
+            minesweeper::Full_cmd full_cmd = line;
+
+            cout << full_cmd.cmd().spelling() << " " << full_cmd.line_idx() << " "
+                 << full_cmd.column_idx() << endl;
+        }
+        catch (const std::exception& e) {
+            cerr << "Invalid command '"s << line << "': " << endl;
+            cerr << e.what() << endl;
+            cerr << "type help or h for usage" << endl << endl;
+        }
     }
 }
 }

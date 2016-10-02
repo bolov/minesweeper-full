@@ -38,16 +38,16 @@ auto test0()
 }
 
 int main() try {
-    cout << "Hello and wake up!" << endl << endl;
+    namespace ms = minesweeper;
 
-    test0();
+    cout << ms::Game::welcome_ << endl << endl;
 
-    using minesweeper::Game;
+    ms::Game_params params = ms::Game::get_params();
 
-    Game game{8, 20, 25};
+    ms::Game game{params};
+
     game.main_loop();
 
-    cout << "Bye Bye now" << endl;
 }
 catch (const gsl::fail_fast& e)
 {
