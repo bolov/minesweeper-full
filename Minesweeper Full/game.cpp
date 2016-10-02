@@ -70,7 +70,7 @@ auto Full_cmd::parse_line(gsl::cstring_span<> line) -> std::tuple<Cmd, size_t, s
                                         std::to_string(tokens.size()) + " provided"};
 
         return std::tuple<Cmd, size_t, size_t>{tokens[0], bolov::str::str_to_int(tokens[1]),
-                                               bolov::str::str_to_int(tokens[2])};
+            bolov::str::str_to_int(tokens[2])};
     }
 }
 
@@ -84,7 +84,7 @@ const std::unordered_map<Game::Difficulty, std::string> Game::sk_difficulty_spel
 };
 
 const std::unordered_map<Game::Difficulty, Game_params> Game::sk_difficulty_params_ = {
-    {Difficulty::e_easy, {6, 4, 5}},
+    {Difficulty::e_easy, {6, 6, 4}},
     {Difficulty::e_medium, {7, 10, 10}},
     {Difficulty::e_difficult, {8, 20, 25}},
     {Difficulty::e_difficult, {-1, -1, -1}},
@@ -156,7 +156,7 @@ auto Game::get_params()->Game_params {
 
             cout << endl;
             return sk_difficulty_params_.at(difficulty);
-            
+
         }
         catch (std::exception&) {
             cout << "Invalid command: '" << line << "'" << endl << endl;
@@ -170,12 +170,26 @@ auto Game::main_loop() -> void
 
     cout << "New game. For help enter help... Duh" << endl;
 
-    while (bolov::utils::get_line(line, "> ")) {
+    while (true) {
+        cout << grid_ << endl;
+        bolov::utils::get_line(line, "> ");
+        cout << endl;
+
         try {
             minesweeper::Full_cmd full_cmd = line;
 
-            cout << full_cmd.cmd().spelling() << " " << full_cmd.line_idx() << " "
-                 << full_cmd.column_idx() << endl;
+            if (!full_cmd.is_simple()) {
+                if (!grid().are_idx_valid(full_cmd.i(), full_cmd.j()))
+                    throw std::invalid_argument{"Coordonates out of range"};
+
+                try {
+                    execute_cmd(full_cmd);
+                }
+                catch (std::exception& e) {
+                    cerr << "error executing command:" << endl;
+                    cerr << e.what() << endl << endl;
+                }
+            }
         }
         catch (const std::exception& e) {
             cerr << "Invalid command '"s << line << "': " << endl;

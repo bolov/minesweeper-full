@@ -47,12 +47,12 @@ public:
 
 private:
     Cmd cmd_;
-    size_t line_idx_;
-    size_t column_idx_;
+    size_t i_;
+    size_t j_;
 
 private:
     Full_cmd(std::tuple<Cmd, size_t, size_t> t)
-        : cmd_{std::get<0>(t)}, line_idx_{std::get<1>(t)}, column_idx_{std::get<2>(t)}
+        : cmd_{std::get<0>(t)}, i_{std::get<1>(t)}, j_{std::get<2>(t)}
     {
     }
 
@@ -61,8 +61,8 @@ public:
 
     auto is_simple() const -> bool { return cmd().is_simple(); }
     auto cmd() const -> Cmd { return cmd_; }
-    auto line_idx() const -> size_t { Expects(!is_simple()); return line_idx_; }
-    auto column_idx() const -> size_t { Expects(!is_simple()); return column_idx_; }
+    auto i() const -> size_t { Expects(!is_simple()); return i_; }
+    auto j() const -> size_t { Expects(!is_simple()); return j_; }
 };
 
 struct Game_params {
@@ -97,6 +97,29 @@ public:
     Game(Game_params params) : Game{params.column_size, params.line_size, params.num_bombs} {}
 
     auto main_loop() -> void;
+
+    const auto& grid() const { return grid_; }
+
+    auto execute_cmd(Full_cmd full_cmd) -> void
+    {
+        switch (full_cmd.cmd()) {
+        case Cmd::e_show:
+            grid_.show(full_cmd.i(), full_cmd.j());
+            break;
+        case Cmd::e_flag:
+            grid_.flag(full_cmd.i(), full_cmd.j());
+            break;
+        case Cmd::e_question:
+            grid_.question(full_cmd.i(), full_cmd.j());
+            break;
+        case Cmd::e_clear:
+            grid_.clear(full_cmd.i(), full_cmd.j());
+            break;
+        default:
+            break;
+        }
+    }
+
 };
 
 } // ns minesweeper

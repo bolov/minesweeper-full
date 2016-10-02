@@ -11,6 +11,8 @@
 
 namespace minesweeper {
 
+using size_t = bolov::gslx::size_t;
+
 class Grid {
 public:
     using size_t = bolov::gslx::size_t;
@@ -20,6 +22,11 @@ public:
         e_flag,
         e_question,
     };
+    enum class State {
+        e_good,
+        e_lose,
+        e_win,
+    };
 
     static const int sk_bomb_cell = -1;
 
@@ -27,6 +34,7 @@ private:
     bolov::containers::Matrix<int> bombs_;
     bolov::containers::Matrix<Display> display_;
     bolov::gslx::size_t num_bombs_;
+    State state_{State::e_good};
 
     auto get_num_neighbour_bombs(size_t i, size_t j) -> int
     {
@@ -38,6 +46,22 @@ private:
                 if (ni == i && nj == j)
                     continue;
                 if (bombs_[ni][nj] == sk_bomb_cell)
+                    ++sum;
+            }
+        }
+        return sum;
+    }
+
+    auto get_num_neighbour_flags(size_t i, size_t j) -> int
+    {
+        using bolov::utils::Size_range;
+
+        int sum = 0;
+        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, bombs_.column_size()})) {
+            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, bombs_.line_size()})) {
+                if (ni == i && nj == j)
+                    continue;
+                if (display_[ni][nj] == Display::e_flag)
                     ++sum;
             }
         }
@@ -60,8 +84,6 @@ public:
         std::fill_n(bombs_.flat_begin(), num_bombs_, sk_bomb_cell);
         std::shuffle(bombs_.flat_begin(), bombs_.flat_end(), random_engine);
 
-        bombs_[0][0] = sk_bomb_cell;
-
         using bolov::utils::Size_range;
 
         // compute neighbours
@@ -77,8 +99,85 @@ public:
         Ensures(bombs_.line_size() == display_.line_size());
     }
 
+    auto column_size() const { return bombs_.column_size(); }
+    auto line_size() const { return bombs_.line_size(); }
+
+    auto are_idx_valid(size_t i, size_t j) const -> bool {
+        return i >= 0 && i < column_size() && j >= 0 && j < line_size();
+    }
+
     const auto& bombs() const { return bombs_; }
     const auto& display() const { return display_; }
+
+    auto show(size_t i, size_t j) -> void {
+        if (bombs_[i][j] == 0) {
+            expand(i, j);
+            return;
+        }
+
+        display_[i][j] = Display::e_shown;
+
+        if (bombs_[i][j] == sk_bomb_cell)
+            state_ = State::e_lose;
+
+    }
+
+    auto flag(size_t i, size_t j) -> void
+    {
+        if (display_[i][j] == Display::e_shown)
+            throw std::invalid_argument{"Cell is shown. Could not set flag."};
+
+        display_[i][j] = Grid::Display::e_flag;
+    }
+
+    auto question(size_t i, size_t j) -> void
+    {
+        if (display_[i][j] == Display::e_shown)
+            throw std::invalid_argument{"Cell is shown. Could not set question."};
+
+        display_[i][j] = Grid::Display::e_question;
+    }
+
+    auto clear(size_t i, size_t j) -> void
+    {
+        if (display_[i][j] != Display::e_shown)
+            throw std::invalid_argument{"Cell is not shown. Could not clear"};
+
+        if (get_num_neighbour_flags(i, j) != bombs_[i][j])
+            return;
+
+        using bolov::utils::Size_range;
+
+        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, column_size()})) {
+            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, line_size()})) {
+                if (display_[i][j] != Display::e_shown)
+                    show(i, j);
+            }
+        }
+    }
+
+private:
+    auto expand(size_t i, size_t j) -> void
+    {
+        if (!are_idx_valid(i, j))
+            return;
+
+        if (display_[i][j] == Display::e_shown)
+            return;
+
+        display_[i][j] = Display::e_shown;
+
+        if (bombs_[i][j] != 0)
+            return;
+
+        using bolov::utils::Size_range;
+
+        for (auto ni : Size_range{i - 1, i + 2}) {
+            for (auto nj : Size_range{j - 1, j + 2}) {
+                expand(ni, nj);
+            }
+        }
+    }
 };
 
 inline auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
@@ -101,7 +200,7 @@ inline auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
             {
             case Grid::Display::e_shown:
                 if (grid.bombs()[i][j] == Grid::sk_bomb_cell)
-                    os << '*' << " ";
+                    os << 'X' << " ";
                 else if (grid.bombs()[i][j] == 0)
                     os << ' ' << " ";
                 else

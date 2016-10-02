@@ -26,8 +26,7 @@ auto test0()
         try {
             minesweeper::Full_cmd full_cmd = line;
 
-            cout << full_cmd.cmd().spelling() << " " << full_cmd.line_idx() << " "
-                 << full_cmd.column_idx() << endl;
+            cout << full_cmd.cmd().spelling() << " " << full_cmd.i() << " " << full_cmd.j() << endl;
         }
         catch (const std::exception& e) {
             cerr << "Invalid command '"s << line << "': " << endl;
