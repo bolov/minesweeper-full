@@ -25,7 +25,7 @@ const std::unordered_map<Cmd::Type, std::string> Cmd::sk_spelling_ = {
     {Cmd::e_flag, "flag"},
     {Cmd::e_question, "question"},
     {Cmd::e_clear, "clear"},
-    {Cmd::e_show, "print"},
+    {Cmd::e_print, "print"},
     {Cmd::e_reset, "reset"},
     {Cmd::e_new, "new"},
     {Cmd::e_quit, "quit"},
@@ -173,7 +173,7 @@ auto Game::main_loop() -> Cmd
 {
     std::string line;
 
-    cout << "New game. For help enter help... Duh" << endl;
+    cout << "New game. For help enter help... Duh" << endl << endl;
 
     bool print = true;
 

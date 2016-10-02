@@ -125,14 +125,14 @@ public:
         if (state_ != State::e_good)
             return;
 
-        size_t sum = 0;
+        size_t remaining = 0;
 
         for (auto d : display_.flat_container()) {
             if (d != Display::e_shown) {
-                ++sum;
+                ++remaining;
             }
         }
-        if (sum == num_bombs_)
+        if (remaining == num_bombs_)
             state_ = State::e_win;
     }
 

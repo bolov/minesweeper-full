@@ -18,24 +18,6 @@ using std::endl;
 
 using namespace std::string_literals;
 
-auto test0()
-{
-    std::string line;
-
-    while (std::getline(cin, line)) {
-        try {
-            minesweeper::Full_cmd full_cmd = line;
-
-            cout << full_cmd.cmd().spelling() << " " << full_cmd.i() << " " << full_cmd.j() << endl;
-        }
-        catch (const std::exception& e) {
-            cerr << "Invalid command '"s << line << "': " << endl;
-            cerr << e.what() << endl;
-            cerr << "type help or h for usage" << endl;
-        }
-    }
-}
-
 int main() try {
     namespace ms = minesweeper;
 
@@ -65,7 +47,7 @@ int main() try {
 
     }
 
-    cout << "Ty for playing. Bye bye" << endl;
+    cout << "Ty for playing. Bye bye" << endl << endl;
 }
 catch (const gsl::fail_fast& e)
 {
