@@ -34,36 +34,44 @@ private:
     bolov::containers::Matrix<int> bombs_;
     bolov::containers::Matrix<Display> display_;
     bolov::gslx::size_t num_bombs_;
+    size_t num_flags_ = 0;
     State state_{State::e_good};
 
-    auto get_num_neighbour_bombs(size_t i, size_t j) -> int
+    auto around_size_range(size_t i, size_t j) const -> std::vector<std::pair<size_t, size_t>>
     {
         using bolov::utils::Size_range;
 
-        int sum = 0;
-        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, bombs_.column_size()})) {
-            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, bombs_.line_size()})) {
+        std::vector<std::pair<size_t, size_t>> around;
+        around.reserve(8);
+
+        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, column_size()})) {
+            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, line_size()})) {
                 if (ni == i && nj == j)
                     continue;
-                if (bombs_[ni][nj] == sk_bomb_cell)
-                    ++sum;
+
+                around.emplace_back(ni, nj);
             }
+        }
+        around.shrink_to_fit();
+        return around;
+    }
+
+    auto get_num_neighbour_bombs(size_t i, size_t j) -> int
+    {
+        int sum = 0;
+        for (auto idx : around_size_range(i, j)) {
+            if (bombs_[idx] == sk_bomb_cell)
+                ++sum;
         }
         return sum;
     }
 
     auto get_num_neighbour_flags(size_t i, size_t j) -> int
     {
-        using bolov::utils::Size_range;
-
         int sum = 0;
-        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, bombs_.column_size()})) {
-            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, bombs_.line_size()})) {
-                if (ni == i && nj == j)
-                    continue;
-                if (display_[ni][nj] == Display::e_flag)
-                    ++sum;
-            }
+        for (auto idx : around_size_range(i, j)) {
+            if (display_[idx] == Display::e_flag)
+                ++sum;
         }
         return sum;
     }
@@ -99,8 +107,8 @@ public:
         Ensures(bombs_.line_size() == display_.line_size());
     }
 
-    auto column_size() const { return bombs_.column_size(); }
-    auto line_size() const { return bombs_.line_size(); }
+    auto column_size() const -> size_t const { return bombs_.column_size(); }
+    auto line_size() const -> size_t { return bombs_.line_size(); }
 
     auto are_idx_valid(size_t i, size_t j) const -> bool {
         return i >= 0 && i < column_size() && j >= 0 && j < line_size();
@@ -109,7 +117,29 @@ public:
     const auto& bombs() const { return bombs_; }
     const auto& display() const { return display_; }
 
+    auto num_bombs() const { return num_bombs_; }
+    auto num_flags() const { return num_flags_; }
+    auto state() const { return state_; }
+
+    auto check_state() -> void {
+        if (state_ != State::e_good)
+            return;
+
+        size_t sum = 0;
+
+        for (auto d : display_.flat_container()) {
+            if (d != Display::e_shown) {
+                ++sum;
+            }
+        }
+        if (sum == num_bombs_)
+            state_ = State::e_win;
+    }
+
     auto show(size_t i, size_t j) -> void {
+        if (display_[i][j] == Display::e_flag)
+            --num_flags_;
+
         if (bombs_[i][j] == 0) {
             expand(i, j);
             return;
@@ -127,13 +157,19 @@ public:
         if (display_[i][j] == Display::e_shown)
             throw std::invalid_argument{"Cell is shown. Could not set flag."};
 
-        display_[i][j] = Grid::Display::e_flag;
+        if (display_[i][j] != Display::e_flag)
+            ++num_flags_;
+
+        display_[i][j] = Display::e_flag;
     }
 
     auto question(size_t i, size_t j) -> void
     {
         if (display_[i][j] == Display::e_shown)
             throw std::invalid_argument{"Cell is shown. Could not set question."};
+
+        if (display_[i][j] == Display::e_flag)
+            --num_flags_;
 
         display_[i][j] = Grid::Display::e_question;
     }
@@ -146,22 +182,15 @@ public:
         if (get_num_neighbour_flags(i, j) != bombs_[i][j])
             return;
 
-        using bolov::utils::Size_range;
-
-        for (auto ni : Size_range{i - 1, i + 2}.clamp_to({0, column_size()})) {
-            for (auto nj : Size_range{j - 1, j + 2}.clamp_to({0, line_size()})) {
-                if (display_[i][j] != Display::e_shown)
-                    show(i, j);
-            }
+        for (auto idx : around_size_range(i, j)) {
+            if (display_[idx] != Display::e_shown && display_[idx] != Display::e_flag)
+                show(idx.first, idx.second);
         }
     }
 
 private:
     auto expand(size_t i, size_t j) -> void
     {
-        if (!are_idx_valid(i, j))
-            return;
-
         if (display_[i][j] == Display::e_shown)
             return;
 
@@ -170,13 +199,8 @@ private:
         if (bombs_[i][j] != 0)
             return;
 
-        using bolov::utils::Size_range;
-
-        for (auto ni : Size_range{i - 1, i + 2}) {
-            for (auto nj : Size_range{j - 1, j + 2}) {
-                expand(ni, nj);
-            }
-        }
+        for (auto idx : around_size_range(i, j))
+            expand(idx.first, idx.second);
     }
 };
 
@@ -219,6 +243,8 @@ inline auto operator<<(std::ostream& os, const Grid& grid) -> std::ostream&
         }
         os << std::endl << std::endl;
     }
+    os << grid.num_flags() << " / " << grid.num_bombs() << std::endl;
+
     return os;
 }
 }

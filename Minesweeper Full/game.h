@@ -100,6 +100,10 @@ public:
 
     const auto& grid() const { return grid_; }
 
+    auto check_state() { grid_.check_state(); }
+
+    auto state() const { return grid().state(); }
+
     auto execute_cmd(Full_cmd full_cmd) -> void
     {
         switch (full_cmd.cmd()) {

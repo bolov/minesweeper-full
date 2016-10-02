@@ -52,6 +52,15 @@ public:
   }
   auto operator[](gslx::size_t i) -> gsl::span<T> { return *(begin() + i); }
 
+  auto operator[](std::pair<size_t, size_t> idx) const -> const T&
+  {
+      return (*this)[idx.first][idx.second];
+  }
+  auto operator[](std::pair<size_t, size_t> idx) -> T&
+  {
+      return (*this)[idx.first][idx.second];
+  }
+
   auto flat_container() const -> const std::vector<T> & { return flat_data_; }
   auto flat_container() -> std::vector<T> & { return flat_data_; }
 

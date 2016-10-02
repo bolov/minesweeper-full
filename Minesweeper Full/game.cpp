@@ -79,14 +79,14 @@ const std::string Game::welcome_ = "Minesweeper. Enjoy!";
 const std::unordered_map<Game::Difficulty, std::string> Game::sk_difficulty_spelling_ = {
     {Difficulty::e_easy, "easy"},
     {Difficulty::e_medium, "medium"},
-    {Difficulty::e_difficult, "hard"},
+    {Difficulty::e_difficult, "difficult"},
     {Difficulty::e_custom, "custom"},
 };
 
 const std::unordered_map<Game::Difficulty, Game_params> Game::sk_difficulty_params_ = {
     {Difficulty::e_easy, {6, 6, 4}},
-    {Difficulty::e_medium, {7, 10, 10}},
-    {Difficulty::e_difficult, {8, 20, 25}},
+    {Difficulty::e_medium, {10, 10, 15}},
+    {Difficulty::e_difficult, {16, 16, 40}},
     {Difficulty::e_difficult, {-1, -1, -1}},
 };
 
@@ -172,6 +172,17 @@ auto Game::main_loop() -> void
 
     while (true) {
         cout << grid_ << endl;
+
+        check_state();
+        if (grid().state() == Grid::State::e_win) {
+            cout << "Congrats. You WON!" << endl << endl;
+            break;
+        }
+        if (grid().state() == Grid::State::e_lose) {
+            cout << "Kaboom !!" << endl << endl;
+            break;
+        }
+
         bolov::utils::get_line(line, "> ");
         cout << endl;
 
@@ -184,6 +195,7 @@ auto Game::main_loop() -> void
 
                 try {
                     execute_cmd(full_cmd);
+
                 }
                 catch (std::exception& e) {
                     cerr << "error executing command:" << endl;
@@ -197,5 +209,7 @@ auto Game::main_loop() -> void
             cerr << "type help or h for usage" << endl << endl;
         }
     }
+
+    cout << "Game over. Thank you for playing" << endl;
 }
 }
