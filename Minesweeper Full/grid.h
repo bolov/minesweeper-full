@@ -157,10 +157,15 @@ public:
         if (display_[i][j] == Display::e_shown)
             throw std::invalid_argument{"Cell is shown. Could not set flag."};
 
-        if (display_[i][j] != Display::e_flag)
+        if (display_[i][j] != Display::e_flag) {
+            display_[i][j] = Display::e_flag;
             ++num_flags_;
+        }
+        else {
+            display_[i][j] = Display::e_hidden;
+            --num_flags_;
+        }
 
-        display_[i][j] = Display::e_flag;
     }
 
     auto question(size_t i, size_t j) -> void
